@@ -22,6 +22,8 @@ func NewTaskConfig(filename string) *TaskConfig {
 
 // TaskURL 任务url 配置相关属性
 type TaskURL struct {
+	BaseURL string
+	Method  string
 	Headers map[string]string
 	Cookies []*http.Cookie
 	Params  map[string]string
@@ -94,14 +96,29 @@ func (tf *TaskConfig) turlFromImportPythonScript() {
 	tf.TURL.Data = make(map[string]string)
 
 	tf.TURL.Cookies = nil
+	tempCookies := make(map[string]string)
 
 	headers := tf.turl.GetAttrString("headers")
 	params := tf.turl.GetAttrString("query_params")
 	data := tf.turl.GetAttrString("data")
+	cookies := tf.turl.GetAttrString("cookies")
 
 	UpdateMapFromPyDict(tf.TURL.Headers, headers)
 	UpdateMapFromPyDict(tf.TURL.Params, params)
 	UpdateMapFromPyDict(tf.TURL.Data, data)
+	UpdateMapFromPyDict(tempCookies, cookies)
+
+	for k, v := range tempCookies {
+		tf.TURL.Cookies = append(tf.TURL.Cookies, &http.Cookie{
+			Name:     k,
+			Value:    v,
+			HttpOnly: true,
+			Secure:   false,
+		})
+	}
+
+	tf.TURL.Method = strings.ToUpper(py.PyString_AsString(tf.turl.GetAttrString("method")))
+	tf.TURL.BaseURL = py.PyString_AsString(tf.turl.GetAttrString("base_url"))
 }
 
 func (tf *TaskConfig) confFromImportPythonScript() {
@@ -229,7 +246,7 @@ func (tf *TaskConfig) confFromImportPythonScript() {
 
 	}
 
-	attr = tf.conf.GetAttrString("sleep")
+	attr = tf.conf.GetAttrString("interval")
 	if attr != nil {
 		if py.PyList_Check(attr) {
 			l := py.PyList_GET_SIZE(attr)

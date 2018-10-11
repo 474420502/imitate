@@ -26,8 +26,8 @@ type TaskURL struct {
 	Method  string
 	Headers map[string]string
 	Cookies []*http.Cookie
-	Params  map[string]string
-	Data    map[string]string
+	Params  map[string]interface{}
+	Data    map[string]interface{}
 }
 
 // TaskConfig 任务配置相关结构
@@ -73,16 +73,45 @@ func (tf *TaskConfig) Reload() bool {
 	return true
 }
 
-// UpdateMapFromPyDict 从Python的dict 更新 golang map
-func UpdateMapFromPyDict(gomap map[string]string, pydict *py.PyObject) {
+// UpdateMapFromPyDict 从Python的dict 更新 golang map[string]interface{}
+func UpdateMapFromPyDict(gomap map[string]interface{}, pydict *py.PyObject) {
 	headersItemList := py.PyDict_Items(pydict)
 
 	if headersItemList != nil {
 		l := py.PyList_GET_SIZE(headersItemList)
 		for i := 0; i < l; i++ {
-			pyitem := py.PyList_GetItem(headersItemList, i)
-			key := py.PyString_AsString(py.PyTuple_GetItem(pyitem, 0))
-			value := py.PyString_AsString(py.PyTuple_GetItem(pyitem, 1))
+			pyitem1 := py.PyList_GetItem(headersItemList, i)
+			key := py.PyString_AsString(py.PyTuple_GetItem(pyitem1, 0))
+			value := py.PyTuple_GetItem(pyitem1, 1)
+
+			if py.PyString_Check(value) {
+				gomap[key] = py.PyString_AsString(value)
+			} else if py.PyList_Check(value) {
+				ll := py.PyList_GET_SIZE(value)
+
+				var vlist []string
+				for ii := 0; ii < ll; ii++ {
+					lvalue := py.PyString_AsString(py.PyList_GetItem(value, ii))
+					vlist = append(vlist, lvalue)
+				}
+
+				gomap[key] = vlist
+			}
+
+		}
+	}
+}
+
+// UpdateStringKVFromPyDict 更新 golang map[string]string
+func UpdateStringKVFromPyDict(gomap map[string]string, pydict *py.PyObject) {
+	headersItemList := py.PyDict_Items(pydict)
+
+	if headersItemList != nil {
+		l := py.PyList_GET_SIZE(headersItemList)
+		for i := 0; i < l; i++ {
+			pyitem1 := py.PyList_GetItem(headersItemList, i)
+			key := py.PyString_AsString(py.PyTuple_GetItem(pyitem1, 0))
+			value := py.PyString_AsString(py.PyTuple_GetItem(pyitem1, 1))
 
 			gomap[key] = value
 		}
@@ -92,8 +121,8 @@ func UpdateMapFromPyDict(gomap map[string]string, pydict *py.PyObject) {
 func (tf *TaskConfig) turlFromImportPythonScript() {
 	tf.TURL = &TaskURL{}
 	tf.TURL.Headers = make(map[string]string)
-	tf.TURL.Params = make(map[string]string)
-	tf.TURL.Data = make(map[string]string)
+	tf.TURL.Params = make(map[string]interface{})
+	tf.TURL.Data = make(map[string]interface{})
 
 	tf.TURL.Cookies = nil
 	tempCookies := make(map[string]string)
@@ -103,10 +132,10 @@ func (tf *TaskConfig) turlFromImportPythonScript() {
 	data := tf.turl.GetAttrString("data")
 	cookies := tf.turl.GetAttrString("cookies")
 
-	UpdateMapFromPyDict(tf.TURL.Headers, headers)
+	UpdateStringKVFromPyDict(tf.TURL.Headers, headers)
 	UpdateMapFromPyDict(tf.TURL.Params, params)
 	UpdateMapFromPyDict(tf.TURL.Data, data)
-	UpdateMapFromPyDict(tempCookies, cookies)
+	UpdateStringKVFromPyDict(tempCookies, cookies)
 
 	for k, v := range tempCookies {
 		tf.TURL.Cookies = append(tf.TURL.Cookies, &http.Cookie{

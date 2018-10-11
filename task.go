@@ -20,13 +20,14 @@ func NewTask(taskFileName string) *Task {
 	t.Config.Load(taskFileName)
 
 	t.Session = grequests.NewSession(nil)
-	t.UpdateSessionFromTURL(t.Config.TURL)
 
 	return t
 }
 
 // Execute 更新Session从turl
 func (t *Task) Execute() (*grequests.Response, error) {
+	t.UpdateSessionFromTURL(t.Config.TURL)
+	// spew.Dump(t.Session)
 	switch t.Config.TURL.Method {
 	case "POST":
 		return t.Session.Post(t.Config.TURL.BaseURL)
@@ -53,4 +54,6 @@ func (t *Task) UpdateSessionFromTURL(turl *TaskURL) {
 	t.Session.RequestOptions.Cookies = turl.Cookies
 	t.Session.RequestOptions.Params = turl.Params
 	t.Session.RequestOptions.Data = turl.Data
+
+	// log.Println(t.Session.HTTPClient.Transport)
 }

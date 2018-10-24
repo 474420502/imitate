@@ -30,7 +30,9 @@ func (t *Task) AutoSetSession() {
 
 	// TODO:
 
-	// t.Session.SetCookies()
+	t.Session.Query = t.Config.Info.Query
+
+	//t.Session.SetCookies()
 }
 
 // Execute 更新Session从turl

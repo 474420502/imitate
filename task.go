@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"log"
 
 	"github.com/474420502/requests"
 )
@@ -29,8 +30,8 @@ func NewTask(taskFileName string) *Task {
 func (t *Task) AutoSetSession() {
 
 	// TODO:
-
 	t.Session.Query = t.Config.Info.Query
+	t.Session.Header = t.Config.Info.Header
 
 	//t.Session.SetCookies()
 }
@@ -57,7 +58,14 @@ func (t *Task) Execute() (*requests.Response, error) {
 	}
 
 	if wf != nil {
+		if t.Config.Info.Cookies != nil {
+			for _, c := range t.Config.Info.Cookies {
+				wf.AddCookie(c)
+			}
+		}
 
+		log.Println(wf.Header)
+		return wf.Execute()
 	}
 
 	return nil, errors.New("the method is not exists! " + t.Config.Info.Method)

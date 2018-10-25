@@ -37,7 +37,7 @@ func init() {
 type TaskInfo struct {
 	BaseURL string
 	Method  string
-	Headers http.Header
+	Header  http.Header
 	Cookies []*http.Cookie
 	Query   url.Values
 	Body    map[string]interface{}
@@ -168,7 +168,7 @@ func UpdateStringKVFromPyDict(gomap map[string]string, pydict *py.PyObject) {
 
 func (tf *TaskConfig) infoFromImportPythonScript() {
 	tf.Info = &TaskInfo{}
-	tf.Info.Headers = make(http.Header)
+	tf.Info.Header = make(http.Header)
 	tf.Info.Query = make(url.Values)
 	tf.Info.Body = make(map[string]interface{})
 
@@ -180,7 +180,7 @@ func (tf *TaskConfig) infoFromImportPythonScript() {
 	data := tf.info.GetAttrString("data")
 	cookies := tf.info.GetAttrString("cookies")
 
-	UpdateMapListFromPyDict(tf.Info.Headers, headers)
+	UpdateMapListFromPyDict(tf.Info.Header, headers)
 	UpdateMapListFromPyDict(tf.Info.Query, query)
 	UpdateMapFromPyDict(tf.Info.Body, data)
 	UpdateStringKVFromPyDict(tempCookies, cookies)

@@ -23,6 +23,8 @@ func NewTask(taskFileName string) *Task {
 	t.Config = &TaskConfig{}
 	t.Config.Load(taskFileName)
 
+	t.AutoSetSession()
+
 	return t
 }
 
@@ -34,6 +36,20 @@ func (t *Task) AutoSetSession() {
 	t.Session.Header = t.Config.Info.Header
 
 	//t.Session.SetCookies()
+}
+
+// ExecuteOnPlan 按时执行
+func (t *Task) ExecuteOnPlan() (IExecute, *requests.Response) {
+	for _, exec := range t.Config.Setting.Plan.ExecuteQueue {
+		log.Println(exec.TimeTo())
+		if exec.TimeTo() >= 0 {
+			resp, err := t.Execute()
+			if err == nil {
+				return exec, resp
+			}
+		}
+	}
+	return nil, nil
 }
 
 // Execute 更新Session从turl
@@ -64,7 +80,6 @@ func (t *Task) Execute() (*requests.Response, error) {
 			}
 		}
 
-		log.Println(wf.Header)
 		return wf.Execute()
 	}
 

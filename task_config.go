@@ -69,8 +69,8 @@ type TaskSetting struct {
 
 // TaskConfig 任务配置相关结构
 type TaskConfig struct {
-	conf *py.PyObject
-	info *py.PyObject
+	setting *py.PyObject
+	info    *py.PyObject
 
 	loadedFilename string
 
@@ -198,96 +198,96 @@ func (tf *TaskConfig) infoFromImportPythonScript() {
 	tf.Info.BaseURL = py.PyString_AsString(tf.info.GetAttrString("base_url"))
 }
 
-func (tf *TaskConfig) confFromImportPythonScript() {
+func (tf *TaskConfig) settingFromImportPythonScript() {
 	var attr *py.PyObject
 
 	tf.Setting = &TaskSetting{}
 
-	attr = tf.conf.GetAttrString("name")
+	attr = tf.setting.GetAttrString("name")
 	if attr != nil {
 		tf.Setting.Name = py.PyString_AsString(attr)
 	} else {
 		tf.Setting.Name = ""
 	}
 
-	attr = tf.conf.GetAttrString("session")
+	attr = tf.setting.GetAttrString("session")
 	if attr != nil {
 		tf.Setting.Session = py.PyInt_AsLong(attr)
 	} else {
 		tf.Setting.Session = 0
 	}
 
-	attr = tf.conf.GetAttrString("retry")
+	attr = tf.setting.GetAttrString("retry")
 	if attr != nil {
 		tf.Setting.Retry = py.PyInt_AsLong(attr)
 	} else {
 		tf.Setting.Retry = 0
 	}
 
-	attr = tf.conf.GetAttrString("priority")
+	attr = tf.setting.GetAttrString("priority")
 	if attr != nil {
 		tf.Setting.Priority = py.PyInt_AsLong(attr)
 	} else {
 		tf.Setting.Priority = 10000
 	}
 
-	attr = tf.conf.GetAttrString("group_name")
+	attr = tf.setting.GetAttrString("group_name")
 	if attr != nil {
 		tf.Setting.GroupName = py.PyString_AsString(attr)
 	} else {
 		tf.Setting.GroupName = "p"
 	}
 
-	attr = tf.conf.GetAttrString("device")
+	attr = tf.setting.GetAttrString("device")
 	if attr != nil {
 		tf.Setting.Device = py.PyString_AsString(attr)
 	} else {
 		tf.Setting.Device = ""
 	}
 
-	attr = tf.conf.GetAttrString("platform")
+	attr = tf.setting.GetAttrString("platform")
 	if attr != nil {
 		tf.Setting.Platform = py.PyString_AsString(attr)
 	} else {
 		tf.Setting.Platform = ""
 	}
 
-	attr = tf.conf.GetAttrString("area_cc")
+	attr = tf.setting.GetAttrString("area_cc")
 	if attr != nil {
 		tf.Setting.AreaCC = py.PyInt_AsLong(attr)
 	} else {
 		tf.Setting.AreaCC = -1
 	}
 
-	attr = tf.conf.GetAttrString("channel")
+	attr = tf.setting.GetAttrString("channel")
 	if attr != nil {
 		tf.Setting.Channel = py.PyInt_AsLong(attr)
 	} else {
 		tf.Setting.Channel = -1
 	}
 
-	attr = tf.conf.GetAttrString("media")
+	attr = tf.setting.GetAttrString("media")
 	if attr != nil {
 		tf.Setting.Media = py.PyInt_AsLong(attr)
 	} else {
 		tf.Setting.Media = -1
 	}
 
-	attr = tf.conf.GetAttrString("spider_id")
+	attr = tf.setting.GetAttrString("spider_id")
 	if attr != nil {
 		tf.Setting.SpiderID = py.PyInt_AsLong(attr)
 	} else {
 		tf.Setting.SpiderID = -1
 	}
 
-	attr = tf.conf.GetAttrString("catch_account_id")
+	attr = tf.setting.GetAttrString("catch_account_id")
 	if attr != nil {
 		tf.Setting.CatchAccountID = py.PyString_AsString(attr)
 	} else {
 		tf.Setting.CatchAccountID = ""
 	}
 
-	attr = tf.conf.GetAttrString("result_processing")
+	attr = tf.setting.GetAttrString("result_processing")
 	if attr != nil {
 		tf.Setting.ResultProcessing = py.PyString_AsString(attr)
 	} else {
@@ -295,7 +295,7 @@ func (tf *TaskConfig) confFromImportPythonScript() {
 	}
 
 	tf.Setting.Proxies = nil
-	attr = tf.conf.GetAttrString("proxies")
+	attr = tf.setting.GetAttrString("proxies")
 	if attr != nil {
 		l := py.PyList_GET_SIZE(attr)
 		for i := 0; i < l; i++ {
@@ -306,40 +306,45 @@ func (tf *TaskConfig) confFromImportPythonScript() {
 	tf.Setting.Plan.ClearIExecute()
 
 	// execute_at = (-1, -1, -1, 12, 30, 12)+
-	attr = tf.conf.GetAttrString("execute_at")
+	attr = tf.setting.GetAttrString("execute_at")
 	if attr != nil {
 		if py.PyList_Check(attr) {
 			l := py.PyList_GET_SIZE(attr)
 			for i := 0; i < l; i++ {
 				ea := &ExecuteAt{}
-				ea.SetStartStatus(true)
+
 				ea.FromPyObject(py.PyList_GetItem(attr, i))
+				ea.SetStartStatus(true)
+				ea.CalculateTrigger()
 				tf.Setting.Plan.AppendIExecute(ea)
 			}
 		} else {
 			ea := &ExecuteAt{}
-			ea.SetStartStatus(true)
 			ea.FromPyObject(attr)
+			ea.SetStartStatus(true)
+			ea.CalculateTrigger()
 			tf.Setting.Plan.AppendIExecute(ea)
 		}
 
 	}
 
-	attr = tf.conf.GetAttrString("interval")
+	attr = tf.setting.GetAttrString("interval")
 	if attr != nil {
 
 		if py.PyList_Check(attr) {
 			l := py.PyList_GET_SIZE(attr)
 			for i := 0; i < l; i++ {
 				ei := &ExecuteInterval{}
-				ei.SetStartStatus(true)
 				ei.FromPyObject(py.PyList_GetItem(attr, i))
+				ei.SetStartStatus(true)
+				ei.CalculateTrigger()
 				tf.Setting.Plan.AppendIExecute(ei)
 			}
 		} else {
 			ei := &ExecuteInterval{}
-			ei.SetStartStatus(true)
 			ei.FromPyObject(attr)
+			ei.SetStartStatus(true)
+			ei.CalculateTrigger()
 			tf.Setting.Plan.AppendIExecute(ei)
 		}
 	}
@@ -367,14 +372,12 @@ func (tf *TaskConfig) Load(filename string) {
 	}
 
 	importpathConfig = importpathTURL + "_config"
-	log.Println("importpathTURL:", importpathTURL)
-	log.Println("importpathConfig:", importpathConfig)
 
 	tf.loadedFilename = filename
 	tf.info = py.PyImport_ImportModule(importpathTURL)
-	tf.conf = py.PyImport_ImportModule(importpathConfig)
+	tf.setting = py.PyImport_ImportModule(importpathConfig)
 
-	tf.confFromImportPythonScript()
+	tf.settingFromImportPythonScript()
 	tf.infoFromImportPythonScript()
 }
 

@@ -26,7 +26,15 @@ func (ea *ExecuteAt) SetStartStatus(status bool) {
 
 // GetTriggerTime 获取计划的触发时间
 func (ea *ExecuteAt) GetTriggerTime() int64 {
-	return ea.TriggerTime
+	if ea.StartStatus {
+		return ea.TriggerTime
+	}
+	return -1
+}
+
+// TimeTo 是否到了该触发的时间
+func (ea *ExecuteAt) TimeTo() int64 {
+	return time.Now().Unix() - ea.TriggerTime
 }
 
 // GetStartStatus 获取计划的触发时间是否在生效

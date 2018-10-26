@@ -21,7 +21,15 @@ func (ei *ExecuteInterval) SetStartStatus(status bool) {
 
 // GetTriggerTime 获取计划的触发时间
 func (ei *ExecuteInterval) GetTriggerTime() int64 {
-	return ei.TriggerTime
+	if ei.StartStatus {
+		return ei.TriggerTime
+	}
+	return -1
+}
+
+// TimeTo 是否到了该触发的时间
+func (ei *ExecuteInterval) TimeTo() int64 {
+	return time.Now().Unix() - ei.TriggerTime
 }
 
 // GetStartStatus 获取计划的触发时间是否在生效

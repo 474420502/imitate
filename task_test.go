@@ -4,22 +4,25 @@ import (
 	"testing"
 )
 
-func TestPersonExecute(t *testing.T) {
-	person := NewTask("task/task_config")
-	if person == nil {
-		t.Error("person is nil")
+func TestTaskExecute(t *testing.T) {
+	task := NewTask("task/task_config")
+	if task == nil {
+		t.Error("task is nil")
 	}
 
-	resp, err := person.Execute()
+	t.Run("test base execute", func(t *testing.T) {
+		resp, err := task.Execute()
+		if err != nil {
+			t.Error(resp.Content())
+		}
+		if len(resp.Content()) <= 500 {
+			t.Error(resp.Content())
+		}
+	})
 
-	if err != nil {
-		t.Error(resp.Content())
-	}
-
-	t.Error(resp.DContent)
-	t.Error(resp.Content())
-	// f.WriteString(resp.String())
-
-	//t.Error(person.Config.TURL.Method, person.Config.TURL.BaseURL)
-	//t.Error(person.Session.RequestOptions.Params)
+	t.Run("test execute plan TimeTo interval and at is not TimeTo", func(t *testing.T) {
+		for exec, resp := task.ExecuteOnPlan(); exec != nil; {
+			t.Error(resp.Content())
+		}
+	})
 }

@@ -12,6 +12,8 @@ type IExecute interface {
 	GetStartStatus() bool       // IsStart 获取计划的触发时间是否在生效
 	GetTriggerTime() int64      // GetTriggerTime 获取计划的触发时间
 
+	TimeTo() int64 // TimeTo 是否到了该触发的时间
+
 	// SetSuccessStatus(status bool) // SetSuccessStatus 设置成功的状态 将记录于历史
 	// History() []ExecuteRecord     // History 记录一些历史, 可能会持久到数据库. 暂时不要
 	CalculateTrigger() int64 // CalculateTrigger 计算触发特定时间任务的时间点
@@ -32,7 +34,7 @@ func (ep *ExecutePlan) ClearIExecute() {
 	ep.ExecuteQueue = []IExecute{}
 }
 
-// ClearIExecute 清除执行计划任务
+// CountIExecute 清除执行计划任务
 func (ep *ExecutePlan) CountIExecute() int {
 	return len(ep.ExecuteQueue)
 }

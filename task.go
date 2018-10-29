@@ -12,6 +12,10 @@ type Task struct {
 	Session *requests.Session
 }
 
+type TypeMode int
+
+const ()
+
 // NewTask new 一个person 对象
 func NewTask(taskFileName string) *Task {
 
@@ -35,6 +39,10 @@ func (t *Task) AutoSetSession() {
 	t.Session.Header = t.Config.Info.Header
 
 	//t.Session.SetCookies()
+}
+
+func (t *Task) SetMode() {
+
 }
 
 // ExecuteOnPlan 按时执行

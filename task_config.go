@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -375,7 +376,13 @@ func (tf *TaskConfig) Load(filename string) {
 
 	tf.loadedFilename = filename
 	tf.info = py.PyImport_ImportModule(importpathTURL)
+	if tf.info == nil {
+		log.Panic(errors.New("info is error, path is " + importpathTURL))
+	}
 	tf.setting = py.PyImport_ImportModule(importpathConfig)
+	if tf.setting == nil {
+		log.Panic(errors.New("setting is error, path is " + importpathConfig))
+	}
 
 	tf.settingFromImportPythonScript()
 	tf.infoFromImportPythonScript()

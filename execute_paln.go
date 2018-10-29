@@ -1,5 +1,9 @@
 package main
 
+import (
+	"github.com/474420502/requests"
+)
+
 // type ExecuteRecord struct {
 // 	IsSuccess bool
 // 	FailCount int
@@ -22,6 +26,12 @@ type IExecute interface {
 // ExecutePlan 执行时间的计划表
 type ExecutePlan struct {
 	ExecuteQueue []IExecute
+}
+
+// PlanResult 执行计划表的结果
+type PlanResult struct {
+	Exec IExecute
+	Resp *requests.Response
 }
 
 // AppendIExecute 添加执行计划任务

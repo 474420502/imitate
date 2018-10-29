@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"log"
 
 	"github.com/474420502/requests"
 )
@@ -39,17 +38,17 @@ func (t *Task) AutoSetSession() {
 }
 
 // ExecuteOnPlan 按时执行
-func (t *Task) ExecuteOnPlan() (IExecute, *requests.Response) {
+func (t *Task) ExecuteOnPlan() []PlanResult {
+	var result []PlanResult
 	for _, exec := range t.Config.Setting.Plan.ExecuteQueue {
-		log.Println(exec.TimeTo())
 		if exec.TimeTo() >= 0 {
 			resp, err := t.Execute()
 			if err == nil {
-				return exec, resp
+				result = append(result, PlanResult{Exec: exec, Resp: resp})
 			}
 		}
 	}
-	return nil, nil
+	return result
 }
 
 // Execute 更新Session从turl

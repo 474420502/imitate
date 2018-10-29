@@ -2,6 +2,7 @@ package main
 
 import (
 	"testing"
+	"time"
 )
 
 func TestTaskExecute(t *testing.T) {
@@ -20,9 +21,18 @@ func TestTaskExecute(t *testing.T) {
 		}
 	})
 
-	t.Run("test execute plan TimeTo interval and at is not TimeTo", func(t *testing.T) {
-		for exec, resp := task.ExecuteOnPlan(); exec != nil; {
-			t.Error(resp.Content())
+}
+
+func TestTaskExecuteOnPlan(t *testing.T) {
+	task := NewTask("task/task_config")
+	if task == nil {
+		t.Error("task is nil")
+	}
+
+	t.Run("test plan interval", func(t *testing.T) {
+		time.Sleep(time.Second * 5)
+		if len(task.ExecuteOnPlan()) < 1 {
+			t.Error("ExecuteOnPlan is error, Maybe TimeTo ...")
 		}
 	})
 }

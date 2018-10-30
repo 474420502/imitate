@@ -10,11 +10,8 @@ import (
 type Task struct {
 	Config  *TaskConfig
 	Session *requests.Session
+	Proxies []string
 }
-
-type TypeMode int
-
-const ()
 
 // NewTask new 一个person 对象
 func NewTask(taskFileName string) *Task {
@@ -35,14 +32,32 @@ func NewTask(taskFileName string) *Task {
 func (t *Task) AutoSetSession() {
 
 	// TODO:
-	t.Session.Query = t.Config.Info.Query
-	t.Session.Header = t.Config.Info.Header
+	if t.Config != nil {
+		t.Session.Query = t.Config.Info.Query
+		t.Session.Header = t.Config.Info.Header
+		t.Proxies = t.Config.Setting.Proxies
+		t.Session.SetConfig(requests.ConfigRequestTimeout, 120)
+	}
 
 	//t.Session.SetCookies()
 }
 
-func (t *Task) SetMode() {
+// SplitFromProxies 从这个拆分的Task 是没办法自动reload配置
+func (t *Task) SplitFromProxies() []Task {
+	var result []Task
 
+	for _, proxy := range t.Config.Setting.Proxies {
+		tempTask := Task{}
+		tempTask.Session = requests.NewSession()
+
+		tempTask.Session.Query = t.Config.Info.Query
+		tempTask.Session.Header = t.Config.Info.Header
+		tempTask.Proxies = append(tempTask.Proxies, proxy)
+
+		result = append(result, tempTask)
+	}
+
+	return result
 }
 
 // ExecuteOnPlan 按时执行
@@ -85,6 +100,11 @@ func (t *Task) Execute() (*requests.Response, error) {
 			for _, c := range t.Config.Info.Cookies {
 				wf.AddCookie(c)
 			}
+		}
+
+		if t.Proxies != nil {
+			t.Session.SetConfig(requests.ConfigProxy, t.Proxies[0])
+			t.Proxies = append(t.Proxies[1:], t.Proxies[0])
 		}
 
 		return wf.Execute()

@@ -11,8 +11,11 @@ func TestPerson(t *testing.T) {
 		panic(err)
 	}
 
+	var tasks []*Task
 	for _, match := range matches {
 		task := NewTask(match)
 		t.Error("task", task)
+		tasks = append(tasks, task)
 	}
+
 }

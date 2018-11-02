@@ -50,6 +50,7 @@ type TaskSetting struct {
 	GroupName string
 
 	Session  int
+	Mode     TypeMode
 	Retry    int
 	Priority int
 
@@ -216,6 +217,13 @@ func (tf *TaskConfig) settingFromImportPythonScript() {
 		tf.Setting.Session = py.PyInt_AsLong(attr)
 	} else {
 		tf.Setting.Session = 0
+	}
+
+	attr = tf.setting.GetAttrString("mode")
+	if attr != nil {
+		tf.Setting.Mode = TypeMode(py.PyInt_AsLong(attr))
+	} else {
+		tf.Setting.Mode = ModeCookie
 	}
 
 	attr = tf.setting.GetAttrString("retry")

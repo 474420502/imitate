@@ -27,36 +27,43 @@ type Person struct {
 }
 
 // NewPerson 创建一个新Person
-func NewPerson(tpath string) *Person {
+func NewPerson(params ...string) *Person {
 	p := Person{}
 
+	for _, tpath := range params {
+		p.LoadTasks(tpath)
+	}
+
+	return &p
+}
+
+// LoadTasks 加载任务
+func (person *Person) LoadTasks(tpath string) {
 	matches, err := filepath.Glob(tpath)
 	if err != nil {
 		panic(err)
 	}
 
-	var tasks []Task
 	for _, match := range matches {
 		task := NewTask(match)
 
 		switch task.Config.Setting.Mode {
 		case ModeCookie:
-			tasks = append(tasks, *task)
+			person.Tasks = append(person.Tasks, *task)
 		case ModeProxy:
 			for _, t := range task.SplitFromProxies() {
-				tasks = append(tasks, t)
+				person.Tasks = append(person.Tasks, t)
 			}
 		}
 	}
-	p.Tasks = tasks
 
-	return &p
 }
 
+// GoResponseToPy Go Response 转 Python格式
 func GoResponseToPy(gresp *requests.Response) *py.PyObject {
 	obj := py.PyDict_New()
-	py.PyDict_SetItem(obj, py.PyString_FromString("Status"), py.PyInt_FromLong(gresp.GResponse.StatusCode))
-	py.PyDict_SetItem(obj, py.PyString_FromString("Content"), py.PyString_FromString(gresp.Content()))
+	py.PyDict_SetItem(obj, py.PyString_FromString("status"), py.PyInt_FromLong(gresp.GResponse.StatusCode))
+	py.PyDict_SetItem(obj, py.PyString_FromString("content"), py.PyString_FromString(gresp.Content()))
 	return obj
 }
 
@@ -65,10 +72,8 @@ func (person *Person) Execute() {
 	//TODO: Python的脚本函数, 与动态更新 返回的数据在python的脚本处理
 	for _, task := range person.Tasks {
 		for _, PResult := range task.ExecuteOnPlan() {
-			if task.Config.Setting.ResultProcessing != "" {
-				GoResponseToPy(PResult.Resp)
-			}
+			sr := &ScriptResult{NextDo: task.Config.Setting.NextDo, Result: GoResponseToPy(PResult.Resp)}
+			callScript(sr)
 		}
-
 	}
 }

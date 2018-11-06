@@ -17,6 +17,9 @@ import (
 	py "github.com/sbinet/go-python"
 )
 
+// ScriptBook 程序的脚本加载总集合
+var ScriptBook map[string]interface{}
+
 // PythonInit 初始化
 func init() {
 	err := py.Initialize()
@@ -31,6 +34,8 @@ func init() {
 
 	py.PyRun_SimpleString("import sys")
 	py.PyRun_SimpleString(fmt.Sprintf("sys.path.append(\"%s\")", path.Dir(filename)))
+
+	LoadScript("script") // script.py加载所有script文件夹下的脚本
 	log.Println("python init success!", path.Dir(filename))
 }
 
@@ -58,7 +63,7 @@ type TaskSetting struct {
 
 	Proxies []string
 
-	ResultProcessing string
+	NextDo string
 
 	Device         string
 	Platform       string
@@ -296,11 +301,11 @@ func (tf *TaskConfig) settingFromImportPythonScript() {
 		tf.Setting.CatchAccountID = ""
 	}
 
-	attr = tf.setting.GetAttrString("result_processing")
+	attr = tf.setting.GetAttrString("next_do")
 	if attr != nil {
-		tf.Setting.ResultProcessing = py.PyString_AsString(attr)
+		tf.Setting.NextDo = py.PyString_AsString(attr)
 	} else {
-		tf.Setting.ResultProcessing = "save"
+		tf.Setting.NextDo = "save"
 	}
 
 	tf.Setting.Proxies = nil
@@ -397,10 +402,10 @@ func (tf *TaskConfig) Load(filename string) {
 }
 
 func (tf *TaskConfig) String() string {
-	res := fmt.Sprintf("name: %s\ngroup_name: %s\nsession: %d\nretry: %d\npriority: %d\nexecute_at: %s\nproxies: %s\nresult_processing: %s\ndevice: %s\nplatform: %s\narea_cc: %d\nchannel: %d\nmedia: %d\nspider_id: %d\ncatch_account_id: %s\n",
+	res := fmt.Sprintf("name: %s\ngroup_name: %s\nsession: %d\nretry: %d\npriority: %d\nexecute_at: %s\nproxies: %s\nnext_do: %s\ndevice: %s\nplatform: %s\narea_cc: %d\nchannel: %d\nmedia: %d\nspider_id: %d\ncatch_account_id: %s\n",
 		tf.Setting.Name, tf.Setting.GroupName, tf.Setting.Session,
 		tf.Setting.Retry, tf.Setting.Priority, spew.Sdump(tf.Setting.Plan),
-		spew.Sdump(tf.Setting.Proxies), tf.Setting.ResultProcessing,
+		spew.Sdump(tf.Setting.Proxies), tf.Setting.NextDo,
 		tf.Setting.Device, tf.Setting.Platform, tf.Setting.AreaCC,
 		tf.Setting.Channel, tf.Setting.Media, tf.Setting.SpiderID,
 		tf.Setting.CatchAccountID,

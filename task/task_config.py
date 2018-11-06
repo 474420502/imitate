@@ -6,7 +6,7 @@ priority = 10000
 # sleep = 0
 interval = 5
 group_name = "p"
-result_processing = "save"
+next_do = "save"
 execute_at = (-1, -1, -1, -1, -1, 30)
 
 device = "eson-OnePlus"

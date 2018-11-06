@@ -19,11 +19,20 @@ func callScript(sresult *ScriptResult) {
 			switch m := method.(type) {
 			case *py.PyObject:
 				result := m.CallFunction(sresult.Result) // GoResponseToPy(PResult.Resp)
-				defer result.DecRef()
 				if result != nil {
 					if py.PyTuple_Check(result) {
 						l := py.PyTuple_GET_SIZE(result)
-						log.Println(l)
+						nextDo := py.PyString_AsString(py.PyList_GetItem(result, 0))
+						sr := &ScriptResult{NextDo: nextDo}
+						if l >= 2 {
+							params := py.PyList_New(l - 1)
+							for i := 1; i < l; i++ {
+								item := py.PyList_GetItem(result, i)
+								py.PyList_Append(params, item)
+							}
+							sr.Result = params
+						}
+						callScript(sr)
 					} else if py.PyString_Check(result) {
 						sr := &ScriptResult{NextDo: py.PyString_AS_STRING(result)}
 						callScript(sr)

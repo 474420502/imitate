@@ -5,7 +5,6 @@ import (
 	"os"
 	"strings"
 	"testing"
-	"time"
 )
 
 func TestPersonExecute(t *testing.T) {
@@ -14,7 +13,6 @@ func TestPersonExecute(t *testing.T) {
 		t.Error("error load tasks", p)
 	}
 
-	time.Sleep(time.Second * 5)
 	p.Execute()
 
 	f, err := os.Open("./test.html")
@@ -27,10 +25,10 @@ func TestPersonExecute(t *testing.T) {
 		t.Error(err)
 	}
 
-	// err = os.Remove("./test.html")
-	// if err != nil {
-	// 	t.Error(err)
-	// }
+	err = os.Remove("./test.html")
+	if err != nil {
+		t.Error(err)
+	}
 
 	if strings.LastIndex(string(out), "doothers") == -1 {
 		t.Error(string(out), "content error")

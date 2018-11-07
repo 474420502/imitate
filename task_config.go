@@ -110,7 +110,7 @@ func (tf *TaskConfig) infoFromImportPythonScript() {
 	tf.Info.Query = make(url.Values)
 	tf.Info.Body = make(map[string]interface{})
 
-	tf.Info.Cookies = nil
+	tf.Info.Cookies = make([]*http.Cookie, 0)
 	tempCookies := make(map[string]string)
 
 	headers := tf.info.GetAttrString("headers")

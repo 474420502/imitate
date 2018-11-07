@@ -102,6 +102,10 @@ func (t *Task) Execute() (*requests.Response, error) {
 			}
 		}
 
+		if len(t.Config.Info.Body) != 0 {
+			wf.SetBodyParams(t.Config.Info.Body)
+		}
+
 		if t.Proxies != nil {
 			t.Session.SetConfig(requests.ConfigProxy, t.Proxies[0])
 			t.Proxies = append(t.Proxies[1:], t.Proxies[0])

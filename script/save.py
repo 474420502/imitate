@@ -1,8 +1,10 @@
 import os
 
-def save(resp):
-    status = resp["status"]
-    content = resp["content"]
+def save(params):
+
+
+    status = params["status"]
+    content = params["content"]
     f = open("./test.html", "w+")
     f.write(content)
     f.close()

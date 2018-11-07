@@ -13,24 +13,22 @@ type ScriptResult struct {
 	Result interface{}
 }
 
-func callScript(sresult *ScriptResult) {
+func callScript(sresult *ScriptResult) error {
 	if sresult.NextDo != "" {
 		if method, ok := ScriptBook[sresult.NextDo]; ok {
 			switch m := method.(type) {
 			case *py.PyObject:
+
 				result := m.CallFunction(sresult.Result) // GoResponseToPy(PResult.Resp)
+				log.Println(sresult.NextDo)
 				if result != nil {
 					if py.PyTuple_Check(result) {
 						l := py.PyTuple_GET_SIZE(result)
-						nextDo := py.PyString_AsString(py.PyList_GetItem(result, 0))
+						nextDo := py.PyString_AsString(py.PyTuple_GetItem(result, 0))
 						sr := &ScriptResult{NextDo: nextDo}
 						if l >= 2 {
-							params := py.PyList_New(l - 1)
-							for i := 1; i < l; i++ {
-								item := py.PyList_GetItem(result, i)
-								py.PyList_Append(params, item)
-							}
-							sr.Result = params
+							item := py.PyTuple_GetItem(result, 1)
+							sr.Result = item
 						}
 						callScript(sr)
 					} else if py.PyString_Check(result) {
@@ -41,10 +39,11 @@ func callScript(sresult *ScriptResult) {
 			}
 
 		} else {
-			panic(errors.New("method is error, key is " + sresult.NextDo))
+			return errors.New("method is error, key is " + sresult.NextDo)
 		}
-
 	}
+
+	return nil
 }
 
 // LoadScript script.py加载所有script文件夹下的脚本

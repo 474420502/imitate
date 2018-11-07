@@ -2,9 +2,6 @@ package main
 
 import (
 	"path/filepath"
-
-	"github.com/474420502/requests"
-	py "github.com/sbinet/go-python"
 )
 
 // TypeMode 多种模式
@@ -59,20 +56,15 @@ func (person *Person) LoadTasks(tpath string) {
 
 }
 
-// GoResponseToPy Go Response 转 Python格式
-func GoResponseToPy(gresp *requests.Response) *py.PyObject {
-	obj := py.PyDict_New()
-	py.PyDict_SetItem(obj, py.PyString_FromString("status"), py.PyInt_FromLong(gresp.GResponse.StatusCode))
-	py.PyDict_SetItem(obj, py.PyString_FromString("content"), py.PyString_FromString(gresp.Content()))
-	return obj
-}
-
 // Execute 执行
 func (person *Person) Execute() {
 	//TODO: Python的脚本函数, 与动态更新 返回的数据在python的脚本处理
 	for _, task := range person.Tasks {
 		for _, PResult := range task.ExecuteOnPlan() {
-			sr := &ScriptResult{NextDo: task.Config.Setting.NextDo, Result: GoResponseToPy(PResult.Resp)}
+			d := NewPyDict()
+			d.UpdateStrStr("content", PResult.Resp.Content())
+			d.UpdateStrInt("status", PResult.Resp.GResponse.StatusCode)
+			sr := &ScriptResult{NextDo: task.Config.Setting.NextDo, Result: d.PyObject()}
 			callScript(sr)
 		}
 	}

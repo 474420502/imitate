@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"path/filepath"
 )
 
@@ -20,7 +21,7 @@ const (
 
 // Person 拥有两种类型并发任务状态, 一种是以cookie为个例控制, 另一种是以 代理为个例子.
 type Person struct {
-	Tasks []Task
+	Tasks []*Task
 }
 
 // NewPerson 创建一个新Person
@@ -46,7 +47,7 @@ func (person *Person) LoadTasks(tpath string) {
 
 		switch task.Config.Setting.Mode {
 		case ModeCookie:
-			person.Tasks = append(person.Tasks, *task)
+			person.Tasks = append(person.Tasks, task)
 		case ModeProxy:
 			for _, t := range task.SplitFromProxies() {
 				person.Tasks = append(person.Tasks, t)
@@ -62,10 +63,14 @@ func (person *Person) Execute() {
 	for _, task := range person.Tasks {
 		for _, PResult := range task.ExecuteOnPlan() {
 			d := NewPyDict()
+			defer d.DecRef()
+
 			d.UpdateStrStr("content", PResult.Resp.Content())
 			d.UpdateStrInt("status", PResult.Resp.GResponse.StatusCode)
 			sr := &ScriptResult{NextDo: task.Config.Setting.NextDo, Result: d.PyObject()}
-			callScript(sr)
+			if err := callScript(sr); err != nil {
+				log.Println(err)
+			}
 		}
 	}
 }

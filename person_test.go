@@ -9,14 +9,20 @@ import (
 )
 
 func TestPersonExecute(t *testing.T) {
+	var err error
+
 	p := NewPerson("task/*_config.py")
 	if len(p.Tasks) == 0 {
 		t.Error("error load tasks", p)
 	}
+
+	os.Remove("/script/save.pyc")
+	os.Remove("/script/doothers.pyc")
+
 	time.Sleep(2)
 	p.Execute()
 
-	f, err := os.Open("./test.html")
+	f, err := os.Open("/tmp/test.html")
 	if err != nil {
 		t.Error(err)
 	}
@@ -26,7 +32,7 @@ func TestPersonExecute(t *testing.T) {
 		t.Error(err)
 	}
 
-	err = os.Remove("./test.html")
+	err = os.Remove("/tmp/test.html")
 	if err != nil {
 		t.Error(err)
 	}

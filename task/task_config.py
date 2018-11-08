@@ -3,7 +3,6 @@ mode = 0
 proxies = ["socks5://10.10.10.1:8080", "socks5://10.10.10.1:8082", "socks5://10.10.10.1:8083", "socks5://10.10.10.1:8085", "socks5://10.10.10.1:8087", "socks5://10.10.10.1:8088", "socks5://10.10.10.1:8089", "socks5://10.10.10.1:8090"]
 retry = 0
 priority = 10000
-sleep = 0
 interval = 2
 group_name = "p"
 next_do = "doothers"

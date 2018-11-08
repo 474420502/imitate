@@ -39,6 +39,11 @@ func (dict *PyDict) PyObject() *py.PyObject {
 	return dict.object
 }
 
+// DecRef 释放引用
+func (dict *PyDict) DecRef() {
+	dict.object.DecRef()
+}
+
 // UpdateMapFromPyDict 从Python的dict 更新至 golang map[string]interface{}
 func UpdateMapFromPyDict(gomap map[string]interface{}, pydict *py.PyObject) {
 	headersItemList := py.PyDict_Items(pydict)

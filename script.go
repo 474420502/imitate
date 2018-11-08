@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"log"
 
 	py "github.com/sbinet/go-python"
 )
@@ -13,14 +12,14 @@ type ScriptResult struct {
 	Result interface{}
 }
 
+// callScript 递归脚本 直到 完成
 func callScript(sresult *ScriptResult) error {
 	if sresult.NextDo != "" {
 		if method, ok := ScriptBook[sresult.NextDo]; ok {
 			switch m := method.(type) {
 			case *py.PyObject:
-
 				result := m.CallFunction(sresult.Result) // GoResponseToPy(PResult.Resp)
-				log.Println(sresult.NextDo)
+				// log.Println(sresult.NextDo)
 				if result != nil {
 					if py.PyTuple_Check(result) {
 						l := py.PyTuple_GET_SIZE(result)
@@ -30,14 +29,13 @@ func callScript(sresult *ScriptResult) error {
 							item := py.PyTuple_GetItem(result, 1)
 							sr.Result = item
 						}
-						callScript(sr)
+						return callScript(sr)
 					} else if py.PyString_Check(result) {
 						sr := &ScriptResult{NextDo: py.PyString_AS_STRING(result)}
-						callScript(sr)
+						return callScript(sr)
 					}
 				}
 			}
-
 		} else {
 			return errors.New("method is error, key is " + sresult.NextDo)
 		}
@@ -60,5 +58,4 @@ func LoadScript(spath string) {
 		value := py.PyTuple_GET_ITEM(item, 1)
 		ScriptBook[key] = value
 	}
-	log.Println(ScriptBook)
 }

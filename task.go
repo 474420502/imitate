@@ -43,11 +43,11 @@ func (t *Task) AutoSetSession() {
 }
 
 // SplitFromProxies 从这个拆分的Task 是没办法自动reload配置
-func (t *Task) SplitFromProxies() []Task {
-	var result []Task
+func (t *Task) SplitFromProxies() []*Task {
+	var result []*Task
 
 	for _, proxy := range t.Config.Setting.Proxies {
-		tempTask := Task{}
+		tempTask := &Task{}
 		tempTask.Session = requests.NewSession()
 
 		tempTask.Session.Query = t.Config.Info.Query

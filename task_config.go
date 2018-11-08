@@ -46,7 +46,7 @@ type TaskInfo struct {
 	Header  http.Header
 	Cookies []*http.Cookie
 	Query   url.Values
-	Body    map[string]interface{}
+	Body    map[string][]string // 目前从Python data参数 转换 缺少data为 byte数据的例子 TODO: 待完善
 }
 
 // TaskSetting 任务基本设置
@@ -108,7 +108,7 @@ func (tf *TaskConfig) infoFromImportPythonScript() {
 	tf.Info = &TaskInfo{}
 	tf.Info.Header = make(http.Header)
 	tf.Info.Query = make(url.Values)
-	tf.Info.Body = make(map[string]interface{})
+	tf.Info.Body = make(map[string][]string)
 
 	tf.Info.Cookies = make([]*http.Cookie, 0)
 	tempCookies := make(map[string]string)
@@ -120,7 +120,7 @@ func (tf *TaskConfig) infoFromImportPythonScript() {
 
 	UpdateMapListFromPyDict(tf.Info.Header, headers)
 	UpdateMapListFromPyDict(tf.Info.Query, query)
-	UpdateMapFromPyDict(tf.Info.Body, data)
+	UpdateMapListFromPyDict(tf.Info.Body, data)
 	UpdateStringKVFromPyDict(tempCookies, cookies)
 
 	for k, v := range tempCookies {

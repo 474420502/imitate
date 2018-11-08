@@ -33,7 +33,7 @@ func TestTaskExecuteOnPlan(t *testing.T) {
 	task.Proxies = nil
 
 	t.Run("test plan interval", func(t *testing.T) {
-		time.Sleep(time.Second * 5)
+		time.Sleep(time.Second * 2)
 
 		if len(task.ExecuteOnPlan()) < 1 {
 			t.Error("ExecuteOnPlan is error, Maybe TimeTo ...")
@@ -47,7 +47,7 @@ func TestTaskExecuteWithProxy(t *testing.T) {
 		t.Error("task is nil")
 	}
 
-	task.Session.SetConfig(requests.ConfigRequestTimeout, 10)
+	task.Session.SetConfig(requests.CRequestTimeout, 10)
 
 	resp, err := task.Execute()
 	if err != nil {

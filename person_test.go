@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestPersonExecute(t *testing.T) {
@@ -12,7 +13,7 @@ func TestPersonExecute(t *testing.T) {
 	if len(p.Tasks) == 0 {
 		t.Error("error load tasks", p)
 	}
-
+	time.Sleep(2)
 	p.Execute()
 
 	f, err := os.Open("./test.html")

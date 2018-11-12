@@ -9,7 +9,6 @@ import (
 )
 
 func TestPersonExecute(t *testing.T) {
-	var err error
 
 	p := NewPerson("task/*_config.py")
 	if len(p.Tasks) == 0 {
@@ -19,27 +18,36 @@ func TestPersonExecute(t *testing.T) {
 	os.Remove("/script/save.pyc")
 	os.Remove("/script/doothers.pyc")
 
-	time.Sleep(2)
-	p.Execute()
+	c := make(chan bool)
+	go func(cr chan bool) {
+		time.Sleep(time.Second * 2)
+		p.Execute()
+		cr <- true
+	}(c)
 
-	f, err := os.Open("/tmp/test.html")
-	if err != nil {
-		t.Error(err)
+	if <-c {
+		f, err := os.Open("/tmp/test.html")
+		if err != nil {
+			t.Error(err)
+		}
+
+		out, err := ioutil.ReadAll(f)
+		if err != nil {
+			t.Error(err)
+		}
+
+		err = os.Remove("/tmp/test.html")
+		if err != nil {
+			t.Error(err)
+		}
+
+		if strings.LastIndex(string(out), "doothers") == -1 {
+			t.Error(string(out), "content error")
+		}
+	} else {
+		t.Error("c is false?")
 	}
 
-	out, err := ioutil.ReadAll(f)
-	if err != nil {
-		t.Error(err)
-	}
-
-	err = os.Remove("/tmp/test.html")
-	if err != nil {
-		t.Error(err)
-	}
-
-	if strings.LastIndex(string(out), "doothers") == -1 {
-		t.Error(string(out), "content error")
-	}
 }
 
 func TestLoadScrit(t *testing.T) {

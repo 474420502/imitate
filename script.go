@@ -19,7 +19,6 @@ func callScript(sresult *ScriptResult) error {
 			switch m := method.(type) {
 			case *py.PyObject:
 				result := m.CallFunction(sresult.Result) // GoResponseToPy(PResult.Resp)
-				// log.Println(sresult.NextDo)
 				if result != nil {
 					if py.PyTuple_Check(result) {
 						l := py.PyTuple_GET_SIZE(result)

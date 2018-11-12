@@ -74,6 +74,12 @@ func (t *Task) ExecuteOnPlan() []PlanResult {
 	return result
 }
 
+// ExecuteWithInfo 额外的url的信息
+func (t *Task) ExecuteWithInfo(info *TaskInfo) (*requests.Response, error) {
+
+	return nil, errors.New("the method is not exists! " + t.Config.Info.Method)
+}
+
 // Execute 更新Session从turl
 func (t *Task) Execute() (*requests.Response, error) {
 	// spew.Dump(t.Session)

@@ -64,7 +64,6 @@ func (person *Person) Execute() {
 		for _, PResult := range task.ExecuteOnPlan() {
 			d := NewPyDict()
 			defer d.DecRef()
-
 			d.UpdateStrStr("content", PResult.Resp.Content())
 			d.UpdateStrInt("status", PResult.Resp.GResponse.StatusCode)
 			sr := &ScriptResult{NextDo: task.Config.Setting.NextDo, Result: d.PyObject()}
